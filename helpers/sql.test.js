@@ -1,7 +1,19 @@
+const db = require("../db");
 const { sqlForPartialUpdate, sqlForFilter } = require("./sql");
-const { SECRET_KEY } = require("../config");
 const { BadRequestError } = require("../expressError");
-const { findAll } = require("../models/company");
+
+
+beforeEach(async function() {
+    await db.query("BEGIN");
+})
+  
+afterEach(async function() {
+    await db.query("ROLLBACK");
+})
+  
+afterAll(async function() {
+    await db.end();
+})
 
 describe("sqlForPartialUpdate", function () {
     test("works", function () {
@@ -80,3 +92,5 @@ describe("sqlForFilter", function () {
 
     })
 });
+
+  
