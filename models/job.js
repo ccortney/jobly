@@ -59,7 +59,8 @@ class Job {
    * Returns [{ id, title, salary, equity, companyHandle  }, ...]
    * */
 
-  static async findAll() {
+  static async findAll(data) {
+    const { whereStr, values } = sqlForFilter(data, "job");
     let jobsRes = await db.query(
         `SELECT id,
                 title,
@@ -67,7 +68,8 @@ class Job {
                 equity,
                 company_handle AS "companyHandle"
           FROM jobs
-          ORDER BY id`); 
+          ${whereStr}
+          ORDER BY id`, values); 
     return jobsRes.rows;
   }
 

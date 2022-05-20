@@ -24,7 +24,7 @@ const router = new express.Router();
  * Authorization required: admin
  */
 
-router.post("/", async function (req, res, next) {
+router.post("/", ensureAdmin, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, jobNewSchema);
     if (!validator.valid) {
@@ -51,7 +51,7 @@ router.post("/", async function (req, res, next) {
 
 router.get("/", async function (req, res, next) {
   try {
-    const jobs = await Job.findAll(req.query);
+    const jobs = await Job.findAll(req.body);
     return res.json({ jobs });
   } catch (err) {
     return next(err);
@@ -85,7 +85,7 @@ router.get("/:id", async function (req, res, next) {
  * Authorization required: admin
  */
 
-router.patch("/:id", async function (req, res, next) {
+router.patch("/:id", ensureAdmin, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, jobUpdateSchema);
     if (!validator.valid) {
@@ -107,7 +107,7 @@ router.patch("/:id", async function (req, res, next) {
  * Authorization: admin
  */
 
-router.delete("/:id", async function (req, res, next) {
+router.delete("/:id", ensureAdmin, async function (req, res, next) {
   try {
     await Job.remove(req.params.id);
     return res.json({ deleted: req.params.id });

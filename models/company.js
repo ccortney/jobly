@@ -50,7 +50,7 @@ class Company {
    * */
 
   static async findAll(data) {
-    const where = sqlForFilter(data);
+    const { whereStr, values } = sqlForFilter(data, "company");
     let companiesRes = await db.query(
         `SELECT handle,
                 name,
@@ -58,8 +58,8 @@ class Company {
                 num_employees AS "numEmployees",
                 logo_url AS "logoUrl"
           FROM companies
-          ${where} 
-          ORDER BY name`); 
+          ${whereStr} 
+          ORDER BY name`, values); 
     return companiesRes.rows;
   }
 

@@ -50,9 +50,9 @@ router.post("/", ensureAdmin, async function (req, res, next) {
  * Authorization required: none
  */
 
-router.get("/", ensureLoggedIn, async function (req, res, next) {
+router.get("/", async function (req, res, next) {
   try {
-    const companies = await Company.findAll(req.query);
+    const companies = await Company.findAll(req.body);
     return res.json({ companies });
   } catch (err) {
     return next(err);

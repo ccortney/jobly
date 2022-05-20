@@ -18,7 +18,7 @@ const { BadRequestError } = require("../expressError");
 
 function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   const keys = Object.keys(dataToUpdate);
-  if (keys.length === 0) throw new BadRequestError("No data");
+  if (keys.length === 0) throw new BadRequestError("No Data");
 
   // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
   const cols = keys.map((colName, idx) =>
@@ -34,6 +34,83 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
  /** Prepare data that can be used to filter the database
    *
    * dataToFilter is an object that contains the data to filter for
+   * Example: {minEmployees: 50, name: Target}
+   * 
+   * Returns whereStr and values
+   * whereStr: a string that contains the the WHERE statement for filtered name/employees 
+   * Example: `WHERE num_employees > $1 AND name iLIKE $2`
+   * 
+   * values: array of values that be substituted in for the parameters
+   * Example: [50, '%Target%']
+   */
+
+function sqlForFilter(dataToFilter, filterFor) {
+
+  const filters = [];
+  const values = [];
+  let whereStr = "";
+  let idx = 1;
+
+  // filters for companies
+  if (filterFor === "company") {
+    if (dataToFilter.minEmployees && dataToFilter.maxEmployees && +dataToFilter.minEmployees > +dataToFilter.maxEmployees) {
+      throw new BadRequestError('minEmployees cannot be greater than maxEmployees');
+    } 
+  
+    if (dataToFilter.name) {
+      filters.push(`name iLIKE $${idx}`);
+      values.push(`%${dataToFilter.name}%`);
+      idx++;
+    }
+  
+    if (dataToFilter.minEmployees) {
+      filters.push(`num_employees >= $${idx}`);
+      values.push(+dataToFilter.minEmployees);
+      idx++;
+    }
+  
+    if (dataToFilter.maxEmployees) {
+      filters.push(`num_employees <= $${idx}`);
+      values.push(+dataToFilter.maxEmployees);
+      idx++;
+    }
+  }
+  
+  // filters for jobs
+  if (filterFor === "job") {
+    if (dataToFilter.title) {
+      filters.push(`title iLIKE $${idx}`);
+      values.push(`%${dataToFilter.title}%`);
+      idx++;
+    }
+  
+    if (dataToFilter.minSalary) {
+      filters.push(`salary >= $${idx}`);
+      values.push(+dataToFilter.minSalary);
+      idx++;
+    }
+  
+    if (dataToFilter.hasEquity === true) {
+      filters.push(`equity > $${idx}`);
+      values.push(0);
+      idx++;
+    } 
+  }
+
+
+  if (filters.length > 0) {
+    whereStr = "WHERE ";
+    whereStr += filters.join(" AND ");
+  }
+  return {
+    whereStr, 
+    values
+  }
+}
+
+ /** Prepare data that can be used to filter the database
+   *
+   * dataToFilter is an object that contains the data to filter for
    * Example: {minEmployees: 50}
    * 
    * Returns whereStr
@@ -41,17 +118,14 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
    * Example: `WHERE num_employees > 50`
    */
 
-function sqlForFilter(dataToFilter) {
-  // if (!dataToFilter) {
-  //   return;
-  // }
+function sqlForFilterOriginalFunction(dataToFilter) {
 
   let name;
   let employees;
   let whereStr;
 
   if (dataToFilter.name) {
-    name = `name iLIKE '%${dataToFilter.name}%'`
+    
   }
   if (dataToFilter.minEmployees && dataToFilter.maxEmployees) {
     if (+dataToFilter.minEmployees > +dataToFilter.maxEmployees) {
