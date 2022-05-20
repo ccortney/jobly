@@ -125,19 +125,35 @@ class User {
 
   static async get(username) {
     const userRes = await db.query(
-          `SELECT username,
-                  first_name AS "firstName",
-                  last_name AS "lastName",
-                  email,
-                  is_admin AS "isAdmin"
-           FROM users
-           WHERE username = $1`,
+          `SELECT u.username,
+                  u.first_name AS "firstName",
+                  u.last_name AS "lastName",
+                  u.email,
+                  u.is_admin AS "isAdmin", 
+                  a.job_id AS "jobId"
+           FROM users AS u
+           LEFT JOIN applications AS a ON (a.username = u.username)
+           WHERE u.username = $1`,
         [username],
     );
 
-    const user = userRes.rows[0];
+    if (!userRes.rows[0]) throw new NotFoundError(`No user: ${username}`);
 
-    if (!user) throw new NotFoundError(`No user: ${username}`);
+    let jobs = [];
+    for (let row of userRes.rows) {
+      if (row.jobId) {
+        jobs.push(row.jobId)
+      }
+    }
+
+    const user = {
+      username: userRes.rows[0].username, 
+      firstName: userRes.rows[0].firstName, 
+      lastName: userRes.rows[0].lastName, 
+      email: userRes.rows[0].email, 
+      isAdmin: userRes.rows[0].isAdmin, 
+      jobsAppliedFor: jobs 
+    }
 
     return user;
   }
@@ -204,7 +220,47 @@ class User {
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
   }
-}
 
+  /** Allows user to apply for a job; returns undefined. */
+
+  static async apply(username, jobId) {
+    const duplicateCheck = await db.query(
+      `SELECT username, job_id
+       FROM applications
+       WHERE username = $1 AND job_id = $2`,
+       [username, jobId]);
+
+    if (duplicateCheck.rows[0]) {
+      throw new BadRequestError(`Already applied for this job!`);
+    }
+
+    const usernameCheck = await db.query(
+      `SELECT username
+       FROM users
+       WHERE username = $1`,
+       [username]);
+
+    if (!usernameCheck.rows[0]) {
+      throw new BadRequestError(`User not found: ${username}`);
+    }
+
+    const jobIdCheck = await db.query(
+      `SELECT id
+       FROM jobs
+       WHERE id = $1`,
+       [jobId]);
+
+    if (!jobIdCheck.rows[0]) {
+      throw new BadRequestError(`Job not found: ${jobId}`);
+    }
+
+    let result = await db.query(
+          `INSERT INTO applications (username, job_id)
+           VALUES ($1, $2)
+           RETURNING username, job_id`,
+        [username, jobId],
+    );
+  }
+}
 
 module.exports = User;

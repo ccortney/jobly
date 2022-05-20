@@ -39,7 +39,10 @@ async function commonBeforeAll() {
              ('Superintendent', 650000, 0.05, 'c1'),
              ('Software Engineer', 125000, 0.35, 'c2')`);
 
-   await db.query(`UPDATE jobs SET id = 1 WHERE title = 'Math Teacher'`)
+  await db.query(`UPDATE jobs SET id = 1 WHERE title = 'Math Teacher'`)
+  await db.query(`UPDATE jobs SET id = 2 WHERE title = 'Superintendent'`)
+
+  await db.query(`INSERT INTO applications (username, job_id) VALUES ('u1', 2)`)
 
 }
 
