@@ -245,7 +245,7 @@ describe("apply", function () {
       await User.apply("nope", 1);
       fail();
     } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
+      expect(err instanceof NotFoundError).toBeTruthy();
     }
   });
 
@@ -254,7 +254,7 @@ describe("apply", function () {
       await User.apply("u1", 0);
       fail();
     } catch (err) {
-      expect(err instanceof BadRequestError).toBeTruthy();
+      expect(err instanceof NotFoundError).toBeTruthy();
     }
   });
 

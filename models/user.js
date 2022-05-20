@@ -118,7 +118,7 @@ class User {
   /** Given a username, return data about user.
    *
    * Returns { username, first_name, last_name, is_admin, jobs }
-   *   where jobs is { id, title, company_handle, company_name, state }
+   *   where jobs is [jobId, jobId, ...]
    *
    * Throws NotFoundError if user not found.
    **/
@@ -241,7 +241,7 @@ class User {
        [username]);
 
     if (!usernameCheck.rows[0]) {
-      throw new BadRequestError(`User not found: ${username}`);
+      throw new NotFoundError(`User not found: ${username}`);
     }
 
     const jobIdCheck = await db.query(
@@ -251,7 +251,7 @@ class User {
        [jobId]);
 
     if (!jobIdCheck.rows[0]) {
-      throw new BadRequestError(`Job not found: ${jobId}`);
+      throw new NotFoundError(`Job not found: ${jobId}`);
     }
 
     let result = await db.query(

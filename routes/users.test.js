@@ -394,24 +394,24 @@ describe("POST /users/:username/jobs/:id", function () {
     expect(resp.statusCode).toEqual(401);
   });
 
-  test("bad request if user not found", async function () {
+  test("not found if invalid username", async function () {
     const resp = await request(app)
         .post(`/users/nope/jobs/1`)
         .set("authorization", `Bearer ${u2Token}`);
-    expect(resp.statusCode).toEqual(400);
+    expect(resp.statusCode).toEqual(404);
   });
 
-  test("bad request if job id not found", async function () {
+  test("not found if invalid job", async function () {
     const resp = await request(app)
         .post(`/users/u1/jobs/0`)
         .set("authorization", `Bearer ${u2Token}`);
-    expect(resp.statusCode).toEqual(400);
+    expect(resp.statusCode).toEqual(404);
   });
 
   test("bad request if duplicate data", async function () {
     const resp = await request(app)
         .post(`/users/u1/jobs/2`)
         .set("authorization", `Bearer ${u2Token}`);
-    expect(resp.statusCode).toEqual(400);
+    expect(resp.statusCode).toEqual(404);
   });
 });
