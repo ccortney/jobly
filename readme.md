@@ -1,6 +1,8 @@
 # Jobly Backend
 
-This is the Express backend for Jobly, version 2.
+This is the Express backend for Jobly.
+
+[Link to the Frontend for Jobly](https://github.com/ohmilla/jobly-react-frontend) 
 
 To run this:
 
@@ -9,3 +11,4 @@ To run this:
 To run the tests:
 
     jest -i
+    
